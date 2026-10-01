@@ -67,6 +67,7 @@
     canvas: document.getElementById('drillCanvas'),
     ctx: document.getElementById('drillCanvas').getContext('2d'),
     rinkSvg: document.getElementById('rinkSvg'),
+    guidelinesSvg: document.getElementById('guidelinesSvg'),
     rinkMarkings: document.getElementById('rinkMarkingsGroup'),
     guidelineElements: document.getElementById('guidelineElements'),
     drillTitleInput: document.getElementById('drillTitleInput'),
@@ -1248,9 +1249,11 @@
     });
 
     // 7. Drills Drawer
-    el.btnDrillsTabHandle.addEventListener('click', () => {
-      el.drillsDrawer.classList.toggle('open');
-    });
+    if (el.btnDrillsTabHandle) {
+      el.btnDrillsTabHandle.addEventListener('click', () => {
+        el.drillsDrawer.classList.toggle('open');
+      });
+    }
     el.btnCloseDrillsDrawer.addEventListener('click', () => {
       el.drillsDrawer.classList.remove('open');
     });

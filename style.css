@@ -453,12 +453,12 @@ html, body {
 .ice-stage-container {
   flex: 1;
   position: relative;
-  background-color: #f1f5f9;
+  background-color: #ffffff;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 0;
 }
 
 .rink-viewport {
@@ -469,8 +469,8 @@ html, body {
   max-height: 100%;
   aspect-ratio: 780 / 680;
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -879,17 +879,7 @@ body.is-dragging-canvas .floating-context-bar {
 }
 
 .drills-tab-handle {
-  pointer-events: auto;
-  align-self: flex-start;
-  margin-top: 14px;
-  background-color: var(--color-primary-blue);
-  color: #ffffff;
-  border: none;
-  border-radius: 4px 0 0 4px;
-  padding: 14px 6px;
-  cursor: pointer;
-  box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.15);
-  transition: background 0.15s;
+  display: none !important;
 }
 
 .drills-tab-handle:hover {
