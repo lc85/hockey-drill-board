@@ -142,7 +142,7 @@
       duration: '10 Mins',
       category: 'dzone',
       rink: 'half-dzone',
-      description: 'Defensive house collapse coverage against offensive perimeter pressure.',
+      description: 'Defensive house coverage with goaltender.',
       objects: [
         // House Defensive Coverage Polygon / "Home Plate" (in background)
         {
@@ -162,30 +162,50 @@
           ]
         },
         // Goalie
+        { id: 'g1', type: 'player', role: 'G', label: 'G', x: 235, y: 425, color: '#111111', radius: 18 }
+      ],
+      selectedId: null,
+      showGuidelinesOnLoad: false
+    },
+    {
+      id: 'dzone-5v5',
+      title: 'D-Zone 5v5 Coverage (Full Team)',
+      duration: '10 Mins',
+      category: 'dzone',
+      rink: 'half-dzone',
+      description: 'Full 5v5 defensive positioning with all forwards, defensemen, and opponents.',
+      objects: [
+        {
+          id: 'house_line1',
+          type: 'line',
+          isHouse: true,
+          color: '#111111',
+          width: 2.4,
+          style: 'solid',
+          points: [
+            { x: 220, y: 455 },
+            { x: 350, y: 290 },
+            { x: 470, y: 290 },
+            { x: 470, y: 560 },
+            { x: 350, y: 560 },
+            { x: 220, y: 395 }
+          ]
+        },
         { id: 'g1', type: 'player', role: 'G', label: 'G', x: 235, y: 425, color: '#111111', radius: 18 },
-        // Left Defense
         { id: 'ld1', type: 'player', role: 'LD', label: 'LD', x: 172, y: 395, color: '#111111', radius: 18 },
-        // Right Defense
         { id: 'rd1', type: 'player', role: 'RD', label: 'RD', x: 282, y: 512, color: '#111111', radius: 18 },
-        // Center
         { id: 'c1', type: 'player', role: 'C', label: 'C', x: 295, y: 275, color: '#111111', radius: 18 },
-        // Left Wing (Active in screenshot)
         { id: 'lw1', type: 'player', role: 'LW', label: 'LW', x: 280, y: 165, color: '#111111', radius: 18 },
-        // Right Wing
         { id: 'rw1', type: 'player', role: 'RW', label: 'RW', x: 520, y: 625, color: '#111111', radius: 18 },
-        
-        // 5 Opponents (Bold X)
         { id: 'x1', type: 'opponent', label: 'X', x: 182, y: 352, color: '#111111', size: 24 },
         { id: 'x2', type: 'opponent', label: 'X', x: 290, y: 228, color: '#111111', size: 24 },
         { id: 'x3', type: 'opponent', label: 'X', x: 308, y: 528, color: '#111111', size: 24 },
         { id: 'x4', type: 'opponent', label: 'X', x: 578, y: 176, color: '#111111', size: 24 },
         { id: 'x5', type: 'opponent', label: 'X', x: 608, y: 636, color: '#111111', size: 24 },
-
-        // Puck
         { id: 'puck1', type: 'puck', x: 274, y: 155, color: '#111111', radius: 8 }
       ],
-      selectedId: 'lw1',
-      showGuidelinesOnLoad: true
+      selectedId: null,
+      showGuidelinesOnLoad: false
     },
     {
       id: 'breakout-2on1',
