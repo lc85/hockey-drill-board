@@ -19,9 +19,15 @@
     showHouse: true,
     showTrapezoid: true,
     
-    // Canvas & Geometry
-    canvasWidth: 1000,
-    canvasHeight: 850,
+    // Canvas & Geometry (Tight cropping to eliminate dead space)
+    viewOffsetX: 145,
+    viewOffsetY: 85,
+    viewWidth: 780,
+    viewHeight: 680,
+    canvasWidth: 780,
+    canvasHeight: 680,
+    scaleX: 1,
+    scaleY: 1,
     scale: 1,
 
     // Drill objects
@@ -93,6 +99,11 @@
     btnSaveAs: document.getElementById('btnSaveAs'),
     btnPrintDrill: document.getElementById('btnPrintDrill'),
     btnExportImage: document.getElementById('btnExportImage'),
+    btnFullscreen: document.getElementById('btnFullscreen'),
+    fsExpandIcon: document.getElementById('fsExpandIcon'),
+    fsCompressIcon: document.getElementById('fsCompressIcon'),
+    orientationModal: document.getElementById('orientationModal'),
+    btnDismissRotate: document.getElementById('btnDismissRotate'),
     btnTopUndo: document.getElementById('btnTopUndo'),
     btnTopRedo: document.getElementById('btnTopRedo'),
     btnGridUndo: document.getElementById('btnGridUndo'),
@@ -278,6 +289,7 @@
     const dpr = window.devicePixelRatio || 1;
     el.canvas.width = state.canvasWidth * dpr;
     el.canvas.height = state.canvasHeight * dpr;
+    el.ctx.setTransform(1, 0, 0, 1, 0, 0);
     el.ctx.scale(dpr, dpr);
   }
 
@@ -291,6 +303,39 @@
 
   // --- SVG HOCKEY RINK DRAWING ENGINE ---
   function renderRinkSVG() {
+    // Dynamic tight cropping to eliminate wasted white margin space
+    if (state.currentRink === 'full') {
+      state.viewOffsetX = 55;
+      state.viewOffsetY = 95;
+      state.viewWidth = 890;
+      state.viewHeight = 660;
+    } else if (state.currentRink === 'neutral') {
+      state.viewOffsetX = 340;
+      state.viewOffsetY = 95;
+      state.viewWidth = 320;
+      state.viewHeight = 660;
+    } else {
+      // half-dzone or half-ozone
+      state.viewOffsetX = 145;
+      state.viewOffsetY = 85;
+      state.viewWidth = 780;
+      state.viewHeight = 680;
+    }
+
+    state.canvasWidth = state.viewWidth;
+    state.canvasHeight = state.viewHeight;
+
+    const viewBoxStr = `${state.viewOffsetX} ${state.viewOffsetY} ${state.viewWidth} ${state.viewHeight}`;
+    el.rinkSvg.setAttribute('viewBox', viewBoxStr);
+    el.guidelinesSvg.setAttribute('viewBox', viewBoxStr);
+
+    const rinkViewport = document.querySelector('.rink-viewport');
+    if (rinkViewport) {
+      rinkViewport.style.aspectRatio = `${state.viewWidth} / ${state.viewHeight}`;
+    }
+
+    setupCanvas();
+
     const g = el.rinkMarkings;
     g.innerHTML = '';
 
@@ -561,6 +606,9 @@
     const ctx = el.ctx;
     ctx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
 
+    ctx.save();
+    ctx.translate(-state.viewOffsetX, -state.viewOffsetY);
+
     // 1. Draw all lines first (background layer)
     state.objects.forEach(obj => {
       if (obj.type === 'line') {
@@ -597,6 +645,8 @@
         drawSelectionBox(ctx, selected);
       }
     }
+
+    ctx.restore();
 
     // 5. Update Guidelines SVG
     renderGuidelines();
@@ -1104,9 +1154,9 @@
     const scaleX = canvasRect.width / state.canvasWidth;
     const scaleY = canvasRect.height / state.canvasHeight;
 
-    // Screen coordinates of object top-center
-    const screenX = canvasRect.left + (bounds.x + bounds.width / 2) * scaleX - containerRect.left;
-    const screenY = canvasRect.top + bounds.y * scaleY - containerRect.top;
+    // Screen coordinates of object top-center (taking view offsets into account)
+    const screenX = canvasRect.left + (bounds.x - state.viewOffsetX + bounds.width / 2) * scaleX - containerRect.left;
+    const screenY = canvasRect.top + (bounds.y - state.viewOffsetY) * scaleY - containerRect.top;
 
     // Move menu up with generous clearance (68px above bounds) so user can freely grab and move object
     let posX = screenX - 90;
@@ -1280,9 +1330,12 @@
     const rect = el.canvas.getBoundingClientRect();
     const scaleX = rect.width / state.canvasWidth;
     const scaleY = rect.height / state.canvasHeight;
-    const x = (clientX - rect.left) / (scaleX || 1);
-    const y = (clientY - rect.top) / (scaleY || 1);
-    return { x: Math.max(0, Math.min(state.canvasWidth, x)), y: Math.max(0, Math.min(state.canvasHeight, y)) };
+    const x = (clientX - rect.left) / (scaleX || 1) + state.viewOffsetX;
+    const y = (clientY - rect.top) / (scaleY || 1) + state.viewOffsetY;
+    return {
+      x: Math.max(state.viewOffsetX, Math.min(state.viewOffsetX + state.viewWidth, x)),
+      y: Math.max(state.viewOffsetY, Math.min(state.viewOffsetY + state.viewHeight, y))
+    };
   }
 
   function onCanvasMouseDown(e) {
@@ -2023,6 +2076,21 @@
     // Export PNG
     el.btnExportImage.addEventListener('click', exportDrillPNG);
 
+    // Fullscreen toggle for mobile/tablet & desktop
+    if (el.btnFullscreen) {
+      el.btnFullscreen.addEventListener('click', toggleFullscreen);
+    }
+    document.addEventListener('fullscreenchange', updateFullscreenIcons);
+
+    // Orientation helper modal dismiss
+    if (el.btnDismissRotate) {
+      el.btnDismissRotate.addEventListener('click', () => {
+        if (el.orientationModal) {
+          el.orientationModal.classList.add('dismissed');
+        }
+      });
+    }
+
     // Toggle guidelines / snap
     el.btnToggleLayers.addEventListener('click', () => {
       state.showGuidelines = !state.showGuidelines;
@@ -2325,6 +2393,24 @@
       showToast('Drill diagram downloaded!');
     };
     img.src = blobURL;
+  }
+
+  // --- FULLSCREEN CONTROLS ---
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  }
+
+  function updateFullscreenIcons() {
+    const isFs = !!document.fullscreenElement;
+    if (el.fsExpandIcon) el.fsExpandIcon.style.display = isFs ? 'none' : 'block';
+    if (el.fsCompressIcon) el.fsCompressIcon.style.display = isFs ? 'block' : 'none';
+    setTimeout(onResize, 150);
   }
 
   // --- COACH NOTES MODAL ---
