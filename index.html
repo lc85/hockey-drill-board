@@ -449,27 +449,29 @@
       </main>
 
       <!-- RIGHT SIDEBAR: "DRILLS" DRAWER & PLAYBOOK (Opened via top folder icon) -->
+      <div class="drawer-backdrop" id="drillsBackdrop"></div>
       <aside class="drills-drawer" id="drillsDrawer">
         <div class="drills-drawer-content">
           <div class="drills-drawer-header">
-            <h3>Drill Playbook</h3>
-            <button type="button" class="close-drawer-btn" id="btnCloseDrillsDrawer">✕</button>
+            <div class="drawer-header-title">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+              <h3>Saved Drills & Playbook</h3>
+            </div>
+            <button type="button" class="close-drawer-btn" id="btnCloseDrillsDrawer" title="Close">✕</button>
           </div>
 
           <div class="drills-category-tabs">
-            <button type="button" class="cat-tab active" data-cat="all">All</button>
-            <button type="button" class="cat-tab" data-cat="dzone">Defensive</button>
-            <button type="button" class="cat-tab" data-cat="offense">Offense</button>
-            <button type="button" class="cat-tab" data-cat="special">Special Teams</button>
+            <button type="button" class="cat-tab active" data-tab="saved" id="tabSavedDrills">💾 My Saved Drills</button>
+            <button type="button" class="cat-tab" data-tab="presets" id="tabPresetDrills">📋 Preset Plays</button>
           </div>
 
           <div class="drills-list" id="drillsList">
-            <!-- Preset & Saved drills populated here -->
+            <!-- Populated dynamically -->
           </div>
 
           <div class="drills-drawer-footer">
             <button type="button" class="primary-action-btn" id="btnSaveCurrentToLibrary">
-              + Save Current Drill
+              + Save Current Ice as New Drill
             </button>
           </div>
         </div>

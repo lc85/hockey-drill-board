@@ -58,6 +58,7 @@
     // Drill Metadata
     drillTitle: 'D-Zone Coverage',
     duration: '10 Mins',
+    activeDrillsTab: 'saved',
     coachingPoints: '• Protect the house (high-danger scoring area)\n• Strong-side winger covers the point\n• Center supports the defensemen down low\n• Stick on the ice, head on a swivel',
     notes: 'Standard 5-man collapse defensive zone coverage against an offensive umbrella.'
   };
@@ -121,10 +122,13 @@
     chkTrapezoidRule: document.getElementById('chkTrapezoidRule'),
     // Drills drawer
     drillsDrawer: document.getElementById('drillsDrawer'),
+    drillsBackdrop: document.getElementById('drillsBackdrop'),
     btnDrillsTabHandle: document.getElementById('btnDrillsTabHandle'),
     btnCloseDrillsDrawer: document.getElementById('btnCloseDrillsDrawer'),
     drillsList: document.getElementById('drillsList'),
     btnSaveCurrentToLibrary: document.getElementById('btnSaveCurrentToLibrary'),
+    tabSavedDrills: document.getElementById('tabSavedDrills'),
+    tabPresetDrills: document.getElementById('tabPresetDrills'),
     // Notes modal
     notesModal: document.getElementById('notesModal'),
     modalDrillName: document.getElementById('modalDrillName'),
@@ -1249,21 +1253,18 @@
     });
 
     // 7. Drills Drawer
-    if (el.btnDrillsTabHandle) {
-      el.btnDrillsTabHandle.addEventListener('click', () => {
-        el.drillsDrawer.classList.toggle('open');
-      });
+    if (el.btnCloseDrillsDrawer) {
+      el.btnCloseDrillsDrawer.addEventListener('click', closeDrillsDrawer);
     }
-    el.btnCloseDrillsDrawer.addEventListener('click', () => {
-      el.drillsDrawer.classList.remove('open');
-    });
+    if (el.drillsBackdrop) {
+      el.drillsBackdrop.addEventListener('click', closeDrillsDrawer);
+    }
 
-    // Category tabs in drawer
+    // Category tabs in drawer (Saved vs Presets)
     document.querySelectorAll('.cat-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
-        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-        e.target.classList.add('active');
-        renderDrillsDrawerList(e.target.dataset.cat);
+        const targetTab = e.currentTarget.dataset.tab || 'saved';
+        setDrillsTab(targetTab);
       });
     });
 
@@ -2115,14 +2116,19 @@
 
     // Library folder button
     el.btnFolderLibrary.addEventListener('click', () => {
-      el.drillsDrawer.classList.toggle('open');
+      if (el.drillsDrawer && el.drillsDrawer.classList.contains('open')) {
+        closeDrillsDrawer();
+      } else {
+        openDrillsDrawer('saved');
+      }
     });
 
     // Save current to library
-    el.btnSaveCurrentToLibrary.addEventListener('click', () => {
-      saveDrillToLocal();
-      renderDrillsDrawerList();
-    });
+    if (el.btnSaveCurrentToLibrary) {
+      el.btnSaveCurrentToLibrary.addEventListener('click', () => {
+        saveDrillToLocal();
+      });
+    }
   }
 
   // --- KEYBOARD SHORTCUTS ---
@@ -2272,25 +2278,95 @@
     ctx.restore();
   }
 
-  // --- SAVE, LOAD, EXPORT & PRINT ---
+  // --- SAVE, LOAD, EXPORT & PLAYBOOK ---
+  function openDrillsDrawer(tab = 'saved') {
+    if (el.drillsDrawer) el.drillsDrawer.classList.add('open');
+    if (el.drillsBackdrop) el.drillsBackdrop.classList.add('active');
+    setDrillsTab(tab);
+  }
+
+  function closeDrillsDrawer() {
+    if (el.drillsDrawer) el.drillsDrawer.classList.remove('open');
+    if (el.drillsBackdrop) el.drillsBackdrop.classList.remove('active');
+  }
+
+  function setDrillsTab(tab) {
+    state.activeDrillsTab = tab;
+    document.querySelectorAll('.cat-tab').forEach(t => {
+      if (t.dataset.tab === tab) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+    renderDrillsDrawerList(tab);
+  }
+
   function saveDrillToLocal() {
+    const defaultName = state.drillTitle && state.drillTitle !== 'D-Zone Coverage' ? state.drillTitle : (state.drillTitle || 'Practice Drill');
+    const enteredName = prompt('Enter a name for this drill:', defaultName);
+    if (!enteredName || !enteredName.trim()) return;
+
+    const drillName = enteredName.trim();
+    state.drillTitle = drillName;
+    if (el.drillTitleInput) el.drillTitleInput.value = drillName;
+
     const drillData = {
       id: 'drill_' + Date.now(),
-      title: state.drillTitle,
-      duration: state.duration,
-      rink: state.currentRink,
-      description: state.notes,
-      coachingPoints: state.coachingPoints,
-      objects: state.objects,
+      title: drillName,
+      duration: state.duration || '10 Mins',
+      rink: state.currentRink || 'half-dzone',
+      description: state.notes || '',
+      coachingPoints: state.coachingPoints || '',
+      objects: JSON.parse(JSON.stringify(state.objects)),
       savedAt: new Date().toISOString()
     };
 
     let userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
-    userDrills.unshift(drillData);
-    localStorage.setItem('hockey_drills', JSON.stringify(userDrills));
+    const existingIdx = userDrills.findIndex(d => d.title.toLowerCase() === drillName.toLowerCase());
+    if (existingIdx >= 0) {
+      if (confirm(`A drill named "${drillName}" already exists. Overwrite it?`)) {
+        userDrills[existingIdx] = drillData;
+      } else {
+        drillData.title += ' (Copy)';
+        userDrills.unshift(drillData);
+      }
+    } else {
+      userDrills.unshift(drillData);
+    }
 
-    showToast(`Drill "${state.drillTitle}" saved!`);
-    renderDrillsDrawerList();
+    localStorage.setItem('hockey_drills', JSON.stringify(userDrills));
+    showToast(`✅ Saved "${drillData.title}" to Library!`);
+
+    // Open drawer to saved drills immediately so the coach sees their saved play!
+    openDrillsDrawer('saved');
+  }
+
+  function loadSavedDrill(drill) {
+    state.drillTitle = drill.title;
+    if (el.drillTitleInput) el.drillTitleInput.value = drill.title;
+    state.duration = drill.duration || '10 Mins';
+    if (el.selectedMins) el.selectedMins.textContent = state.duration;
+    state.notes = drill.description || '';
+    state.coachingPoints = drill.coachingPoints || '';
+    setRinkMode(drill.rink || 'half-dzone');
+    state.objects = JSON.parse(JSON.stringify(drill.objects || []));
+    state.selectedObjectId = null;
+    pushHistory();
+    updateFloatingBar();
+    render();
+    closeDrillsDrawer();
+    showToast(`Loaded "${drill.title}" onto ice`);
+  }
+
+  function deleteSavedDrill(index) {
+    let userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
+    if (index >= 0 && index < userDrills.length) {
+      const removed = userDrills.splice(index, 1);
+      localStorage.setItem('hockey_drills', JSON.stringify(userDrills));
+      showToast(`Deleted "${removed[0]?.title || 'drill'}"`);
+      renderDrillsDrawerList('saved');
+    }
   }
 
   function loadPresetDrill(presetId) {
@@ -2314,51 +2390,98 @@
     render();
   }
 
-  function renderDrillsDrawerList(category = 'all') {
+  function renderDrillsDrawerList(tab = state.activeDrillsTab || 'saved') {
     el.drillsList.innerHTML = '';
 
-    // Preset drills
-    const presetsToShow = category === 'all' ? PRESET_DRILLS : PRESET_DRILLS.filter(d => d.category === category);
-    presetsToShow.forEach(drill => {
-      const card = document.createElement('div');
-      card.className = `drill-card ${state.drillTitle === drill.title ? 'active' : ''}`;
-      card.innerHTML = `
-        <div class="drill-card-title">${drill.title}</div>
-        <div class="drill-card-meta">
-          <span class="badge-tag">${drill.duration}</span>
-          <span>${drill.rink.toUpperCase()}</span>
-        </div>
-      `;
-      card.addEventListener('click', () => {
-        loadPresetDrill(drill.id);
-        el.drillsDrawer.classList.remove('open');
-      });
-      el.drillsList.appendChild(card);
-    });
+    if (tab === 'saved') {
+      const userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
+      if (userDrills.length === 0) {
+        el.drillsList.innerHTML = `
+          <div class="empty-saved-drills">
+            <div class="empty-saved-icon">📁</div>
+            <div style="font-weight:700; color:#0f172a; font-size:14px;">No Saved Drills Yet</div>
+            <div style="font-size:12px; line-height:1.45;">Design your drill on the ice, then click the <strong>💾 Save</strong> icon or <strong>"+ Save Current Ice as New Drill"</strong> below to save it here!</div>
+          </div>
+        `;
+        return;
+      }
 
-    // Custom user saved drills from LocalStorage
-    const userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
-    userDrills.forEach(drill => {
-      const card = document.createElement('div');
-      card.className = 'drill-card';
-      card.innerHTML = `
-        <div class="drill-card-title">${drill.title} (Custom)</div>
-        <div class="drill-card-meta">
-          <span class="badge-tag">${drill.duration || '10 Mins'}</span>
-          <span>Saved Drill</span>
-        </div>
-      `;
-      card.addEventListener('click', () => {
-        state.drillTitle = drill.title;
-        el.drillTitleInput.value = drill.title;
-        state.objects = drill.objects || [];
-        setRinkMode(drill.rink || 'half-dzone');
-        updateFloatingBar();
-        render();
-        el.drillsDrawer.classList.remove('open');
+      userDrills.forEach((drill, idx) => {
+        const card = document.createElement('div');
+        const isActive = state.drillTitle === drill.title;
+        card.className = `drill-card ${isActive ? 'active' : ''}`;
+
+        let dateStr = 'Recently';
+        if (drill.savedAt) {
+          try {
+            const d = new Date(drill.savedAt);
+            dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+          } catch(e) {}
+        }
+        const itemCount = drill.objects ? drill.objects.length : 0;
+        const rinkLabel = drill.rink === 'full' ? 'FULL RINK' : (drill.rink === 'neutral' ? 'NEUTRAL ZONE' : 'HALF RINK');
+
+        card.innerHTML = `
+          <div class="drill-card-top">
+            <div class="drill-card-title">${drill.title}</div>
+            <span class="badge-tag">${rinkLabel}</span>
+          </div>
+          <div class="drill-card-meta">
+            <span>📅 ${dateStr}</span>
+            <span>•</span>
+            <span>${itemCount} items</span>
+          </div>
+          <div class="drill-card-actions">
+            <button type="button" class="drill-load-btn" data-action="load">Load onto Ice</button>
+            <button type="button" class="drill-delete-btn" data-action="delete" title="Delete this drill">🗑️</button>
+          </div>
+        `;
+
+        card.querySelector('[data-action="load"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          loadSavedDrill(drill);
+        });
+
+        card.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Delete saved drill "${drill.title}"?`)) {
+            deleteSavedDrill(idx);
+          }
+        });
+
+        card.addEventListener('click', () => {
+          loadSavedDrill(drill);
+        });
+
+        el.drillsList.appendChild(card);
       });
-      el.drillsList.appendChild(card);
-    });
+
+    } else {
+      // Presets tab
+      PRESET_DRILLS.forEach(drill => {
+        const card = document.createElement('div');
+        card.className = `drill-card ${state.drillTitle === drill.title ? 'active' : ''}`;
+        card.innerHTML = `
+          <div class="drill-card-top">
+            <div class="drill-card-title">${drill.title}</div>
+            <span class="badge-tag">${drill.duration}</span>
+          </div>
+          <div class="drill-card-meta">
+            <span>${drill.rink.toUpperCase()}</span>
+            <span>•</span>
+            <span>${drill.description || 'Hockey coaching template'}</span>
+          </div>
+          <div class="drill-card-actions">
+            <button type="button" class="drill-load-btn">Load Template</button>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          loadPresetDrill(drill.id);
+          closeDrillsDrawer();
+        });
+        el.drillsList.appendChild(card);
+      });
+    }
   }
 
   function exportDrillPNG() {
