@@ -1082,6 +1082,27 @@ body.is-dragging-canvas .floating-context-bar {
   color: #ffffff;
 }
 
+.drill-share-btn {
+  padding: 6px 10px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.drill-share-btn:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
 .empty-saved-drills {
   padding: 40px 16px;
   text-align: center;
@@ -1152,6 +1173,19 @@ body.is-dragging-canvas .floating-context-bar {
   box-shadow: var(--shadow-dropdown);
   overflow: hidden;
   animation: modalIn 0.2s ease-out;
+}
+
+.modal-drills-card {
+  width: 94%;
+  max-width: 620px;
+  max-height: 88vh;
+}
+
+@media (max-width: 640px) {
+  .modal-drills-card {
+    width: 96%;
+    max-height: 94vh;
+  }
 }
 
 @keyframes modalIn {

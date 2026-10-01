@@ -448,34 +448,6 @@
         </button>
       </main>
 
-      <!-- RIGHT SIDEBAR: "DRILLS" DRAWER & PLAYBOOK (Opened via top folder icon) -->
-      <div class="drawer-backdrop" id="drillsBackdrop"></div>
-      <aside class="drills-drawer" id="drillsDrawer">
-        <div class="drills-drawer-content">
-          <div class="drills-drawer-header">
-            <div class="drawer-header-title">
-              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-              <h3>Saved Drills & Playbook</h3>
-            </div>
-            <button type="button" class="close-drawer-btn" id="btnCloseDrillsDrawer" title="Close">✕</button>
-          </div>
-
-          <div class="drills-category-tabs">
-            <button type="button" class="cat-tab active" data-tab="saved" id="tabSavedDrills">💾 My Saved Drills</button>
-            <button type="button" class="cat-tab" data-tab="presets" id="tabPresetDrills">📋 Preset Plays</button>
-          </div>
-
-          <div class="drills-list" id="drillsList">
-            <!-- Populated dynamically -->
-          </div>
-
-          <div class="drills-drawer-footer">
-            <button type="button" class="primary-action-btn" id="btnSaveCurrentToLibrary">
-              + Save Current Ice as New Drill
-            </button>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <!-- DRILL NOTES / COACHING POINTS MODAL -->
@@ -510,6 +482,41 @@
         <div class="modal-footer">
           <button type="button" class="secondary-btn" id="btnCancelNotes">Cancel</button>
           <button type="button" class="primary-btn" id="btnSaveNotes">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVED DRILLS & PLAYBOOK MODAL -->
+    <div class="modal-backdrop" id="drillsModal" style="display: none;">
+      <div class="modal-card modal-drills-card" style="max-width: 620px; max-height: 88vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div class="drawer-header-title" style="display: flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+            <h3 style="margin: 0; font-size: 16px;">Saved Drills & Playbook</h3>
+          </div>
+          <button type="button" class="modal-close-btn" id="btnCloseDrillsModal" title="Close">✕</button>
+        </div>
+
+        <div style="background: #f1f5f9; padding: 8px 16px; font-size: 12px; color: #475569; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+            <span>Public Cloud Storage (No login required)</span>
+          </span>
+          <button type="button" id="btnSyncCloudDrills" style="background: none; border: none; color: #0284c7; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Sync latest drills from cloud">
+            ↻ Refresh Cloud
+          </button>
+        </div>
+
+        <div class="drills-category-tabs" style="display: flex; padding: 8px 12px; gap: 8px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+          <button type="button" class="cat-tab active" data-tab="saved" id="tabSavedDrills">💾 Team Saved Drills</button>
+          <button type="button" class="cat-tab" data-tab="presets" id="tabPresetDrills">📋 System Templates</button>
+        </div>
+
+        <div class="drills-list" id="drillsList" style="flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+        <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+          <button type="button" class="secondary-btn" id="btnDismissDrillsModal">Close</button>
+          <button type="button" class="primary-btn" id="btnSaveCurrentToLibrary" style="font-weight: 600;">+ Save Current Board to Cloud</button>
         </div>
       </div>
     </div>

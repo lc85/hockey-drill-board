@@ -1,5 +1,5 @@
 // Service Worker for 100% Offline Rink Use
-const CACHE_NAME = 'hockey-drill-board-v5';
+const CACHE_NAME = 'hockey-drill-board-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

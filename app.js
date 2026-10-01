@@ -120,11 +120,11 @@
     chkGoalieAngles: document.getElementById('chkGoalieAngles'),
     chkHouseCoverage: document.getElementById('chkHouseCoverage') || document.getElementById('chkGoalieCreaseBox'),
     chkTrapezoidRule: document.getElementById('chkTrapezoidRule'),
-    // Drills drawer
-    drillsDrawer: document.getElementById('drillsDrawer'),
-    drillsBackdrop: document.getElementById('drillsBackdrop'),
-    btnDrillsTabHandle: document.getElementById('btnDrillsTabHandle'),
-    btnCloseDrillsDrawer: document.getElementById('btnCloseDrillsDrawer'),
+    // Drills modal (Public Cloud Playbook)
+    drillsModal: document.getElementById('drillsModal'),
+    btnCloseDrillsModal: document.getElementById('btnCloseDrillsModal'),
+    btnDismissDrillsModal: document.getElementById('btnDismissDrillsModal'),
+    btnSyncCloudDrills: document.getElementById('btnSyncCloudDrills'),
     drillsList: document.getElementById('drillsList'),
     btnSaveCurrentToLibrary: document.getElementById('btnSaveCurrentToLibrary'),
     tabSavedDrills: document.getElementById('tabSavedDrills'),
@@ -274,10 +274,16 @@
     renderRinkSVG();
     loadPresetDrill('dzone-coverage');
     bindEvents();
-    renderDrillsDrawerList();
+    renderDrillsList();
     render();
     window.addEventListener('resize', onResize);
     onResize();
+
+    // Check for shared drill in URL hash (#drill=...)
+    loadDrillFromHash();
+
+    // Sync drills from public cloud playbook (no login required)
+    syncCloudDrills(false);
 
     // Register PWA Service Worker for offline rink access
     if ('serviceWorker' in navigator) {
@@ -1252,15 +1258,23 @@
       renderRinkSVG();
     });
 
-    // 7. Drills Drawer
-    if (el.btnCloseDrillsDrawer) {
-      el.btnCloseDrillsDrawer.addEventListener('click', closeDrillsDrawer);
+    // 7. Drills Modal & Tabs
+    if (el.btnCloseDrillsModal) {
+      el.btnCloseDrillsModal.addEventListener('click', closeDrillsModal);
     }
-    if (el.drillsBackdrop) {
-      el.drillsBackdrop.addEventListener('click', closeDrillsDrawer);
+    if (el.btnDismissDrillsModal) {
+      el.btnDismissDrillsModal.addEventListener('click', closeDrillsModal);
+    }
+    if (el.drillsModal) {
+      el.drillsModal.addEventListener('click', (e) => {
+        if (e.target === el.drillsModal) closeDrillsModal();
+      });
+    }
+    if (el.btnSyncCloudDrills) {
+      el.btnSyncCloudDrills.addEventListener('click', () => syncCloudDrills(true));
     }
 
-    // Category tabs in drawer (Saved vs Presets)
+    // Category tabs in modal (Saved vs Presets)
     document.querySelectorAll('.cat-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
         const targetTab = e.currentTarget.dataset.tab || 'saved';
@@ -2116,10 +2130,10 @@
 
     // Library folder button
     el.btnFolderLibrary.addEventListener('click', () => {
-      if (el.drillsDrawer && el.drillsDrawer.classList.contains('open')) {
-        closeDrillsDrawer();
+      if (el.drillsModal && el.drillsModal.style.display !== 'none') {
+        closeDrillsModal();
       } else {
-        openDrillsDrawer('saved');
+        openDrillsModal('saved');
       }
     });
 
@@ -2278,17 +2292,27 @@
     ctx.restore();
   }
 
-  // --- SAVE, LOAD, EXPORT & PLAYBOOK ---
-  function openDrillsDrawer(tab = 'saved') {
-    if (el.drillsDrawer) el.drillsDrawer.classList.add('open');
-    if (el.drillsBackdrop) el.drillsBackdrop.classList.add('active');
+  // --- SAVE, LOAD, EXPORT & PLAYBOOK (PUBLIC CLOUD PLAYBOOK - NO LOGIN REQUIRED) ---
+  const CLOUD_PLAYBOOK_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0f8894bd25a93';
+
+  function openDrillsModal(tab = 'saved') {
+    if (el.drillsModal) {
+      el.drillsModal.style.display = 'flex';
+    }
     setDrillsTab(tab);
+    // Refresh cloud drills in background whenever modal opens
+    syncCloudDrills(false);
   }
 
-  function closeDrillsDrawer() {
-    if (el.drillsDrawer) el.drillsDrawer.classList.remove('open');
-    if (el.drillsBackdrop) el.drillsBackdrop.classList.remove('active');
+  function closeDrillsModal() {
+    if (el.drillsModal) {
+      el.drillsModal.style.display = 'none';
+    }
   }
+
+  // Alias for backward compatibility
+  const openDrillsDrawer = openDrillsModal;
+  const closeDrillsDrawer = closeDrillsModal;
 
   function setDrillsTab(tab) {
     state.activeDrillsTab = tab;
@@ -2299,7 +2323,72 @@
         t.classList.remove('active');
       }
     });
-    renderDrillsDrawerList(tab);
+    renderDrillsList(tab);
+  }
+
+  // Public Cloud Playbook Sync (No Login Required)
+  function syncCloudDrills(showToastAlert = false) {
+    if (showToastAlert) showToast('Syncing with public cloud...');
+    fetch(CLOUD_PLAYBOOK_URL)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.data && Array.isArray(data.data.drills)) {
+          const cloudDrills = data.data.drills;
+          let localDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
+
+          const map = new Map();
+          // Seed cloud drills
+          cloudDrills.forEach(d => {
+            if (d && d.title) {
+              const key = (d.id || d.title).toLowerCase();
+              map.set(key, d);
+            }
+          });
+          // Merge local drills if not present
+          localDrills.forEach(d => {
+            if (d && d.title) {
+              const key = (d.id || d.title).toLowerCase();
+              if (!map.has(key)) {
+                map.set(key, d);
+              }
+            }
+          });
+
+          const merged = Array.from(map.values());
+          if (merged.length > 0) {
+            localStorage.setItem('hockey_drills', JSON.stringify(merged));
+          }
+
+          if (state.activeDrillsTab === 'saved') {
+            renderDrillsList('saved');
+          }
+          if (showToastAlert) {
+            showToast(`Synced team drills from cloud!`);
+          }
+        }
+      })
+      .catch(err => {
+        console.warn('Cloud sync error / offline:', err);
+        if (showToastAlert) showToast('Using local drills playbook');
+      });
+  }
+
+  function pushDrillsToCloud(drills) {
+    fetch(CLOUD_PLAYBOOK_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Hockey Drills Playbook',
+        data: { drills: drills }
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log('Saved to cloud playbook:', data);
+    })
+    .catch(err => {
+      console.warn('Could not push to cloud playbook:', err);
+    });
   }
 
   function saveDrillToLocal() {
@@ -2336,14 +2425,16 @@
     }
 
     localStorage.setItem('hockey_drills', JSON.stringify(userDrills));
-    showToast(`✅ Saved "${drillData.title}" to Library!`);
+    pushDrillsToCloud(userDrills);
+    showToast(`✅ Saved "${drillData.title}" to Public Cloud Playbook!`);
 
-    // Open drawer to saved drills immediately so the coach sees their saved play!
-    openDrillsDrawer('saved');
+    // Immediately open drills modal so the coach sees their saved play!
+    openDrillsModal('saved');
   }
 
   function loadSavedDrill(drill) {
-    state.drillTitle = drill.title;
+    if (!drill) return;
+    state.drillTitle = drill.title || 'Practice Drill';
     if (el.drillTitleInput) el.drillTitleInput.value = drill.title;
     state.duration = drill.duration || '10 Mins';
     if (el.selectedMins) el.selectedMins.textContent = state.duration;
@@ -2355,7 +2446,7 @@
     pushHistory();
     updateFloatingBar();
     render();
-    closeDrillsDrawer();
+    closeDrillsModal();
     showToast(`Loaded "${drill.title}" onto ice`);
   }
 
@@ -2364,8 +2455,45 @@
     if (index >= 0 && index < userDrills.length) {
       const removed = userDrills.splice(index, 1);
       localStorage.setItem('hockey_drills', JSON.stringify(userDrills));
+      pushDrillsToCloud(userDrills);
       showToast(`Deleted "${removed[0]?.title || 'drill'}"`);
-      renderDrillsDrawerList('saved');
+      renderDrillsList('saved');
+    }
+  }
+
+  function shareDrillLink(drill) {
+    try {
+      const json = JSON.stringify(drill);
+      const b64 = btoa(unescape(encodeURIComponent(json)));
+      const shareUrl = window.location.origin + window.location.pathname + '#drill=' + b64;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast('🔗 Drill link copied! Anyone can view with no login.');
+        }).catch(() => {
+          prompt('Copy this drill link to share:', shareUrl);
+        });
+      } else {
+        prompt('Copy this drill link to share:', shareUrl);
+      }
+    } catch(e) {
+      alert('Could not generate share link: ' + e.message);
+    }
+  }
+
+  function loadDrillFromHash() {
+    if (!window.location.hash || !window.location.hash.startsWith('#drill=')) return;
+    try {
+      const b64 = window.location.hash.replace('#drill=', '');
+      const json = decodeURIComponent(escape(atob(b64)));
+      const drill = JSON.parse(json);
+      if (drill && Array.isArray(drill.objects)) {
+        setTimeout(() => {
+          loadSavedDrill(drill);
+          showToast(`Loaded shared drill: "${drill.title}"`);
+        }, 300);
+      }
+    } catch(err) {
+      console.warn('Failed to parse drill from hash', err);
     }
   }
 
@@ -2390,20 +2518,39 @@
     render();
   }
 
-  function renderDrillsDrawerList(tab = state.activeDrillsTab || 'saved') {
+  function renderDrillsList(tab = state.activeDrillsTab || 'saved') {
+    if (!el.drillsList) return;
     el.drillsList.innerHTML = '';
 
     if (tab === 'saved') {
-      const userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
+      let userDrills = JSON.parse(localStorage.getItem('hockey_drills') || '[]');
+
+      // Fallback initial starter drills if storage is empty
       if (userDrills.length === 0) {
-        el.drillsList.innerHTML = `
-          <div class="empty-saved-drills">
-            <div class="empty-saved-icon">📁</div>
-            <div style="font-weight:700; color:#0f172a; font-size:14px;">No Saved Drills Yet</div>
-            <div style="font-size:12px; line-height:1.45;">Design your drill on the ice, then click the <strong>💾 Save</strong> icon or <strong>"+ Save Current Ice as New Drill"</strong> below to save it here!</div>
-          </div>
-        `;
-        return;
+        const starterDrills = [
+          {
+            id: 'drill_dzone_5v5',
+            title: 'D-Zone 5v5 House Coverage',
+            duration: '10 Mins',
+            rink: 'half-dzone',
+            description: 'Full 5v5 defensive positioning protecting the high-danger house area.',
+            coachingPoints: '• Protect the house (high-danger scoring area)\n• Strong-side winger covers the point\n• Center supports defensemen down low',
+            objects: PRESET_DRILLS.find(p => p.id === 'dzone-5v5')?.objects || [],
+            savedAt: new Date().toISOString()
+          },
+          {
+            id: 'drill_breakout_2on1',
+            title: 'Breakout 2-on-1 Counter',
+            duration: '15 Mins',
+            rink: 'half-ozone',
+            description: 'Quick breakout up the wall with center swing and cross-ice 2-on-1 entry.',
+            coachingPoints: '• Defenseman quick shoulder check\n• Winger chips off boards\n• Center drives middle with speed',
+            objects: PRESET_DRILLS.find(p => p.id === 'breakout-2on1')?.objects || [],
+            savedAt: new Date().toISOString()
+          }
+        ];
+        userDrills = starterDrills;
+        localStorage.setItem('hockey_drills', JSON.stringify(starterDrills));
       }
 
       userDrills.forEach((drill, idx) => {
@@ -2429,10 +2576,13 @@
           <div class="drill-card-meta">
             <span>📅 ${dateStr}</span>
             <span>•</span>
+            <span>⏱️ ${drill.duration || '10 Mins'}</span>
+            <span>•</span>
             <span>${itemCount} items</span>
           </div>
           <div class="drill-card-actions">
             <button type="button" class="drill-load-btn" data-action="load">Load onto Ice</button>
+            <button type="button" class="drill-share-btn" data-action="share" title="Copy shareable link with no login required">🔗 Share</button>
             <button type="button" class="drill-delete-btn" data-action="delete" title="Delete this drill">🗑️</button>
           </div>
         `;
@@ -2440,6 +2590,11 @@
         card.querySelector('[data-action="load"]').addEventListener('click', (e) => {
           e.stopPropagation();
           loadSavedDrill(drill);
+        });
+
+        card.querySelector('[data-action="share"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          shareDrillLink(drill);
         });
 
         card.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
@@ -2477,12 +2632,14 @@
         `;
         card.addEventListener('click', () => {
           loadPresetDrill(drill.id);
-          closeDrillsDrawer();
+          closeDrillsModal();
         });
         el.drillsList.appendChild(card);
       });
     }
   }
+
+  const renderDrillsDrawerList = renderDrillsList;
 
   function exportDrillPNG() {
     // Generate high quality composite image with rink background + canvas drawings
