@@ -1,0 +1,1241 @@
+/* ==========================================================================
+   HOCKEY COACH WHITEBOARD - COMPLETE STYLESHEET
+   Accurately recreating professional coaching drill builder UI
+   ========================================================================== */
+
+:root {
+  --color-primary-blue: #105991;
+  --color-primary-dark: #0a3d66;
+  --color-primary-hover: #1669a8;
+  --color-rink-select: #475569;
+  --color-rink-select-hover: #334155;
+  --color-ice-white: #ffffff;
+  --color-ice-bg: #f8fafc;
+  --color-rink-boards: #1e293b;
+  --color-goal-red: #dc2626;
+  --color-blue-line: #1d4ed8;
+  --color-crease-blue: #bfdbfe;
+  --color-border-subtle: #cbd5e1;
+  --color-border-dark: #94a3b8;
+  --color-text-main: #1e293b;
+  --color-text-muted: #64748b;
+  --color-guideline: #0284c7;
+  --color-highlight-red: #dc2626;
+  --font-family-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-floating: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-family-main);
+  color: var(--color-text-main);
+  background-color: #e2e8f0;
+  user-select: none;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==========================================================================
+   TOP HEADER NAVIGATION
+   ========================================================================== */
+.top-nav {
+  height: 52px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 50;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drill-title-wrapper {
+  position: relative;
+}
+
+.drill-title-input {
+  font-family: var(--font-family-main);
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  width: 250px;
+  outline: none;
+  background-color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.drill-title-input:hover {
+  border-color: #94a3b8;
+}
+
+.drill-title-input:focus {
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 0 0 2px rgba(16, 89, 145, 0.2);
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family-main);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.rink-select-btn {
+  background-color: var(--color-rink-select);
+  color: #ffffff;
+  border-color: var(--color-rink-select);
+  font-weight: 600;
+}
+
+.rink-select-btn:hover {
+  background-color: var(--color-rink-select-hover);
+  border-color: var(--color-rink-select-hover);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 170px;
+  background: #ffffff;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  box-shadow: var(--shadow-dropdown);
+  padding: 4px;
+  display: none;
+  z-index: 100;
+}
+
+.dropdown-wrapper.open .dropdown-menu {
+  display: block;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #334155;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: var(--color-primary-blue);
+}
+
+.dropdown-item.active {
+  background-color: #e0f2fe;
+  color: var(--color-primary-blue);
+  font-weight: 600;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+.icon-btn:active {
+  background-color: #e2e8f0;
+}
+
+.divider-v {
+  width: 1px;
+  height: 22px;
+  background-color: #e2e8f0;
+  margin: 0 4px;
+}
+
+/* ==========================================================================
+   WORKSPACE CONTAINER
+   ========================================================================== */
+.workspace {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  height: calc(100vh - 52px);
+}
+
+/* ==========================================================================
+   LEFT SIDEBAR TOOLS (Exact 2-column grid matching screenshot)
+   ========================================================================== */
+.sidebar-tools {
+  width: 96px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--color-border-subtle);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  flex-shrink: 0;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
+}
+
+.sidebar-tools.collapsed {
+  width: 36px;
+}
+
+.tools-header {
+  height: 38px;
+  background-color: var(--color-primary-blue);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.sidebar-tools.collapsed .tools-title {
+  display: none;
+}
+
+.collapse-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  transition: transform 0.2s;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-tools.collapsed .collapse-btn {
+  transform: rotate(180deg);
+}
+
+.tools-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 4px;
+}
+
+.sidebar-tools.collapsed .tools-grid-scroll,
+.sidebar-tools.collapsed .goalie-accordion {
+  display: none;
+}
+
+/* Custom compact scrollbar for tools */
+.tools-grid-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.tools-grid-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.tool-btn {
+  height: 38px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+}
+
+.tool-btn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.tool-btn.active {
+  background-color: #e0f2fe;
+  border-color: var(--color-primary-blue);
+  color: var(--color-primary-blue);
+  box-shadow: inset 0 0 0 1px var(--color-primary-blue);
+}
+
+/* Player token buttons (LW, C, RW, LD, G, RD, F, D, Coach) */
+.text-token-btn {
+  font-family: var(--font-family-main);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.token-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.circle-coach {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* The red highlight on RW like in screenshot */
+.text-token-btn.active-highlight-red {
+  background-color: var(--color-highlight-red);
+  color: #ffffff;
+  border-color: #b91c1c;
+}
+.text-token-btn.active-highlight-red:hover {
+  background-color: #b91c1c;
+  color: #ffffff;
+}
+
+.font-abc {
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.font-x {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* Accordion for Goalie */
+.goalie-accordion {
+  border-top: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 12px;
+}
+
+.goalie-header {
+  width: 100%;
+  height: 32px;
+  background: var(--color-primary-blue);
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.goalie-header:hover {
+  background: var(--color-primary-dark);
+}
+
+.accordion-chevron {
+  transition: transform 0.2s;
+}
+
+.goalie-accordion.closed .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.goalie-accordion.closed .goalie-body {
+  display: none;
+}
+
+.goalie-body {
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #ffffff;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.toggle-row input {
+  accent-color: var(--color-primary-blue);
+}
+
+/* ==========================================================================
+   ICE STAGE CANVAS AREA
+   ========================================================================== */
+.ice-stage-container {
+  flex: 1;
+  position: relative;
+  background-color: #f1f5f9;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.rink-viewport {
+  position: relative;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1000 / 850;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rink-svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#drillCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  cursor: crosshair;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.guidelines-overlay-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ==========================================================================
+   FLOATING CONTEXT TOOLBAR (Matches screenshot pill above LW)
+   ========================================================================== */
+.floating-context-bar {
+  position: absolute;
+  top: 24px;
+  left: 140px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
+  z-index: 45;
+  animation: fadeIn 0.12s ease-out;
+  transition: opacity 0.15s;
+}
+
+body.is-dragging-canvas .floating-context-bar {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.context-obj-tag {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  padding: 2px 4px;
+}
+
+.obj-type-label {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.obj-name-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.context-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e2e8f0;
+}
+
+.color-picker-wrapper,
+.stroke-picker-wrapper,
+.more-options-wrapper {
+  position: relative;
+}
+
+.swatch-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.swatch-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.swatch-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #111111;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.icon-btn-compact {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.icon-btn-compact:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Color Palette Popover */
+.color-palette-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: var(--shadow-dropdown);
+  padding: 6px;
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  z-index: 100;
+}
+
+.color-picker-wrapper.open .color-palette-popover {
+  display: grid;
+}
+
+.palette-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.palette-dot:hover {
+  transform: scale(1.15);
+}
+
+/* Stroke Menu Popover */
+.stroke-menu-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: var(--shadow-dropdown);
+  padding: 8px;
+  width: 180px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 100;
+}
+
+.stroke-picker-wrapper.open .stroke-menu-popover {
+  display: flex;
+}
+
+.popover-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.stroke-options {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stroke-option-btn {
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stroke-option-btn:hover {
+  background: #f1f5f9;
+}
+
+.stroke-option-btn.active {
+  background: #e0f2fe;
+  color: var(--color-primary-blue);
+  font-weight: 600;
+}
+
+/* More Menu Popover */
+.more-menu-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: var(--shadow-dropdown);
+  padding: 4px;
+  min-width: 140px;
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.more-options-wrapper.open .more-menu-popover {
+  display: flex;
+}
+
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: #334155;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.more-item:hover {
+  background: #f1f5f9;
+}
+
+.more-item.text-danger {
+  color: #dc2626;
+}
+
+.more-item.text-danger:hover {
+  background: #fee2e2;
+}
+
+/* ==========================================================================
+   ANIMATION CONTROLS
+   ========================================================================== */
+.anim-control-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 15px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.anim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-blue);
+  border: none;
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.anim-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.anim-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anim-slider {
+  width: 140px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+.anim-time-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.anim-btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.anim-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.anim-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.anim-close-btn:hover {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   COACH ASSISTANT BUBBLE (Bottom right like screenshot)
+   ========================================================================== */
+.coach-assistant-bubble {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary-blue);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(16, 89, 145, 0.35);
+  cursor: pointer;
+  z-index: 45;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.coach-assistant-bubble:hover {
+  transform: scale(1.08);
+  background-color: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   RIGHT SIDEBAR: "DRILLS" TAB & DRAWER
+   ========================================================================== */
+.drills-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.drills-tab-handle {
+  pointer-events: auto;
+  align-self: flex-start;
+  margin-top: 14px;
+  background-color: var(--color-primary-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px 0 0 4px;
+  padding: 14px 6px;
+  cursor: pointer;
+  box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s;
+}
+
+.drills-tab-handle:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.drills-tab-handle span {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.drills-drawer-content {
+  pointer-events: auto;
+  width: 320px;
+  background-color: #ffffff;
+  border-left: 1px solid var(--color-border-subtle);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drills-drawer.open .drills-drawer-content {
+  transform: translateX(0);
+}
+
+.drills-drawer-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drills-drawer-header h3 {
+  font-family: var(--font-family-heading);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.close-drawer-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.close-drawer-btn:hover {
+  color: #0f172a;
+}
+
+.drills-category-tabs {
+  display: flex;
+  padding: 8px 12px;
+  gap: 6px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.cat-tab {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  text-align: center;
+}
+
+.cat-tab:hover {
+  color: #1e293b;
+}
+
+.cat-tab.active {
+  background: #ffffff;
+  color: var(--color-primary-blue);
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.drills-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drill-card {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drill-card:hover {
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.drill-card.active {
+  border-color: var(--color-primary-blue);
+  background: #f0f9ff;
+}
+
+.drill-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.drill-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.badge-tag {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.drills-drawer-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.primary-action-btn {
+  width: 100%;
+  padding: 8px 14px;
+  background: var(--color-primary-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.primary-action-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   MODAL DIALOGS
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: var(--shadow-dropdown);
+  overflow: hidden;
+  animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.modal-text-input,
+.modal-select,
+.modal-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-family-main);
+  font-size: 13.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  outline: none;
+}
+
+.modal-text-input:focus,
+.modal-select:focus,
+.modal-textarea:focus {
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 0 0 2px rgba(16, 89, 145, 0.2);
+}
+
+.modal-footer {
+  padding: 12px 18px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.secondary-btn {
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.secondary-btn:hover {
+  background: #f1f5f9;
+}
+
+.primary-btn {
+  padding: 8px 16px;
+  background: var(--color-primary-blue);
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATION
+   ========================================================================== */
+.toast-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.toast-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   PRINT STYLES (Clean printable hockey coach drill sheet)
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff;
+  }
+  .top-nav,
+  .sidebar-tools,
+  .floating-context-bar,
+  .drills-drawer,
+  .coach-assistant-bubble,
+  .anim-control-bar {
+    display: none !important;
+  }
+  .workspace {
+    height: auto;
+  }
+  .ice-stage-container {
+    padding: 0;
+    background: #ffffff;
+  }
+  .rink-viewport {
+    box-shadow: none;
+    max-width: 100%;
+    max-height: 100%;
+    border: 1px solid #ccc;
+  }
+}

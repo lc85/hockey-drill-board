@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hockey Coach Whiteboard - Drill & Playmaker Studio</title>
+  <meta name="description" content="Interactive hockey training whiteboard and drill designer for coaches, identical to professional hockey coaching tools.">
+  <meta name="theme-color" content="#105991">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DrillCoach">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- TOP HEADER BAR -->
+    <header class="top-nav" id="topNav">
+      <div class="nav-left">
+        <div class="drill-title-wrapper">
+          <input type="text" id="drillTitleInput" class="drill-title-input" value="D-Zone Coverage" spellcheck="false" title="Drill Name">
+        </div>
+        
+        <div class="dropdown-wrapper">
+          <button type="button" class="nav-btn dropdown-toggle" id="minsDropdownBtn">
+            <span id="selectedMins">10 Mins</span>
+            <svg class="chevron-icon" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 6l4 4 4-4z"/></svg>
+          </button>
+          <div class="dropdown-menu" id="minsMenu">
+            <div class="dropdown-item" data-mins="5 Mins">5 Mins</div>
+            <div class="dropdown-item active" data-mins="10 Mins">10 Mins</div>
+            <div class="dropdown-item" data-mins="15 Mins">15 Mins</div>
+            <div class="dropdown-item" data-mins="20 Mins">20 Mins</div>
+            <div class="dropdown-item" data-mins="Custom">Custom...</div>
+          </div>
+        </div>
+
+        <div class="dropdown-wrapper">
+          <button type="button" class="nav-btn rink-select-btn" id="rinkDropdownBtn">
+            <span id="selectedRink">Rink</span>
+            <svg class="chevron-icon" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 6l4 4 4-4z"/></svg>
+          </button>
+          <div class="dropdown-menu" id="rinkMenu">
+            <div class="dropdown-item active" data-rink="half-dzone">Half Rink (D-Zone)</div>
+            <div class="dropdown-item" data-rink="half-ozone">Half Rink (O-Zone)</div>
+            <div class="dropdown-item" data-rink="full">Full Rink (200x85)</div>
+            <div class="dropdown-item" data-rink="neutral">Neutral Zone / Cross Ice</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <!-- Top action icons matching screenshot -->
+        <button type="button" class="icon-btn" id="btnToggleLayers" title="Toggle Guidelines & Snap">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5zm0 9L2 16l10 5 10-5-10-5zm0-4.5L18.5 7 12 3.75 5.5 7 12 6.5z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnSaveDrill" title="Save Drill">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnSaveAs" title="Duplicate / Save As">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14zm-4-6h-2v2h-2v-2H9v-2h2v-2h2v2h2v2z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnPrintDrill" title="Print Drill Sheet">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnExportImage" title="Export as PNG / Share">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+        </button>
+
+        <div class="divider-v"></div>
+
+        <button type="button" class="icon-btn" id="btnTopUndo" title="Undo (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnTopRedo" title="Redo (Ctrl+Y)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnFolderLibrary" title="Drill Library">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnClearBoard" title="Clear Canvas">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+
+        <button type="button" class="icon-btn" id="btnDrillNotes" title="Drill Notes & Focus Points">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+      <!-- LEFT TOOLS SIDEBAR -->
+      <aside class="sidebar-tools" id="sidebarTools">
+        <div class="tools-header" id="toolsHeader">
+          <span class="tools-title">TOOLS</span>
+          <button type="button" class="collapse-btn" id="btnCollapseTools" title="Collapse / Expand Tools">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M10 12l-4-4 4-4z"/></svg>
+          </button>
+        </div>
+
+        <div class="tools-grid-scroll">
+          <div class="tools-grid">
+            <!-- Row 1: Select Pointer & Path Arrow -->
+            <button type="button" class="tool-btn active" data-tool="select" title="Select & Move (V)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="currentColor" d="M3.5 2.5l7 19 2.5-7.5 7.5-2.5-17-9z"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="path-arrow" title="Player Skating Path (Arrow)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 19C10 15 14 10 18 5m0 0h-6m6 0v6"/>
+              </svg>
+            </button>
+
+            <!-- Row 2: Squiggly Line & Straight Line -->
+            <button type="button" class="tool-btn" data-tool="wavy-line" title="Stickhandling / Puck Carry (Wavy Line)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M3 16c2.5-6 5.5-6 8 0s5.5 6 8 0"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="line" title="Pass / Straight Line (L)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <line x1="4" y1="19" x2="20" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <!-- Row 3: Undo & Redo inside grid -->
+            <button type="button" class="tool-btn" id="btnGridUndo" title="Undo">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+            </button>
+            <button type="button" class="tool-btn" id="btnGridRedo" title="Redo">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+            </button>
+
+            <!-- Row 4: Player Tokens LW, C, RW -->
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="LW" title="Left Wing (LW)">
+              <span class="token-icon">LW</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="C" title="Center (C)">
+              <span class="token-icon">C</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn active-highlight-red" data-tool="token-player" data-player="RW" title="Right Wing (RW)">
+              <span class="token-icon">RW</span>
+            </button>
+
+            <!-- Row 5: Player Tokens LD, G, RD -->
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="LD" title="Left Defense (LD)">
+              <span class="token-icon">LD</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="G" title="Goalie (G)">
+              <span class="token-icon">G</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="RD" title="Right Defense (RD)">
+              <span class="token-icon">RD</span>
+            </button>
+
+            <!-- Row 6: F, D, Coach (C in circle) -->
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="F" title="Forward (F)">
+              <span class="token-icon">F</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-player" data-player="D" title="Defense (D)">
+              <span class="token-icon">D</span>
+            </button>
+            <button type="button" class="tool-btn text-token-btn" data-tool="token-coach" data-player="COACH" title="Coach Token">
+              <span class="token-icon circle-coach">©</span>
+            </button>
+
+            <!-- Row 7: Text 'abc' & Video camera -->
+            <button type="button" class="tool-btn" data-tool="text" title="Text Label (T)">
+              <span class="font-abc">abc</span>
+            </button>
+            <button type="button" class="tool-btn" id="btnToolAnimate" data-tool="animate" title="Drill Animation & Playback">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="currentColor" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+              </svg>
+            </button>
+
+            <!-- Row 8: Net & Stick -->
+            <button type="button" class="tool-btn" data-tool="item-net" title="Hockey Net / Goal">
+              <svg viewBox="0 0 24 24" width="22" height="20">
+                <path d="M4 18h16v-8c0-3.3-2.7-6-6-6h-4c-3.3 0-6 2.7-6 6v8z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M8 4v14M12 4v14M16 4v14M4 10h16M4 14h16" stroke="currentColor" stroke-width="1" stroke-dasharray="1 1.5"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="item-stick" title="Hockey Stick Obstacle">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M18 3L8 19H3v2h6.5l10.5-17.5L18 3z" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Row 9: Pylon/Cone & Tire -->
+            <button type="button" class="tool-btn" data-tool="item-cone" title="Training Pylon / Cone">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 3L6 19H4v2h16v-2h-2L12 3zm0 4.5l2.6 7H9.4L12 7.5z" fill="currentColor"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="item-tire" title="Obstacle Tire">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" fill="none"/>
+                <circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </button>
+
+            <!-- Row 10: Puck & Puck Cluster -->
+            <button type="button" class="tool-btn" data-tool="item-puck" title="Puck (P)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <ellipse cx="12" cy="12" rx="7.5" ry="5.5" fill="currentColor"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="item-puck-cluster" title="Cluster of Pucks">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <circle cx="9" cy="9" r="3.5" fill="currentColor"/>
+                <circle cx="15" cy="10" r="3.5" fill="currentColor"/>
+                <circle cx="11.5" cy="15" r="3.5" fill="currentColor"/>
+                <circle cx="16.5" cy="15.5" r="3" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Row 11: Triangle & Circle -->
+            <button type="button" class="tool-btn" data-tool="shape-triangle" title="Triangle Shape">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <polygon points="12 4 4 20 20 20" fill="none" stroke="currentColor" stroke-width="2.2"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="shape-circle" title="Circle Shape">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.2"/>
+              </svg>
+            </button>
+
+            <!-- Row 12: Square & X (Opponent) -->
+            <button type="button" class="tool-btn" data-tool="shape-square" title="Square Shape">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="token-opponent" data-player="X" title="Opponent Defender (X)">
+              <span class="token-icon font-x">✕</span>
+            </button>
+
+            <!-- Row 13: Thick Line / Border & Dimension Line -->
+            <button type="button" class="tool-btn" data-tool="line-thick" title="Thick Divider / Foam Border">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <rect x="3" y="10" width="18" height="4" rx="1" fill="currentColor"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="line-dimension" title="Connector Line with End Dots">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2"/>
+                <circle cx="4" cy="12" r="2.5" fill="currentColor"/>
+                <circle cx="20" cy="12" r="2.5" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Row 14: Gate / Barrier -->
+            <button type="button" class="tool-btn" data-tool="item-barrier" title="Rink Gate / Rebounder Barrier">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M5 6v12h3V15h8v3h3V6h-3v3H8V6H5z" fill="currentColor"/>
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" data-tool="eraser" title="Eraser (E)">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M15.14 3c-.51 0-1.02.2-1.41.59L2.59 14.73c-.78.78-.78 2.05 0 2.83L6.44 21.4c.78.78 2.05.78 2.83 0l11.14-11.14c.78-.78.78-2.05 0-2.83l-3.85-3.84c-.4-.4-.91-.59-1.42-.59zm-1.41 3.41l3.54 3.54-9.33 9.33-3.54-3.54 9.33-9.33z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Accordion Section: Goalie Tools -->
+        <div class="goalie-accordion" id="goalieAccordion">
+          <button type="button" class="goalie-header" id="btnGoalieToggle">
+            <span>GOALIE</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 10l4-4 4 4z"/></svg>
+          </button>
+          <div class="goalie-body" id="goalieBody">
+            <label class="toggle-row">
+              <input type="checkbox" id="chkGoalieAngles">
+              <span>Depth & Shooting Angles</span>
+            </label>
+            <label class="toggle-row">
+              <input type="checkbox" id="chkHouseCoverage" checked>
+              <span>House</span>
+            </label>
+            <label class="toggle-row">
+              <input type="checkbox" id="chkTrapezoidRule" checked>
+              <span>Restricted Trapezoid</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ICE RINK CANVAS AREA -->
+      <main class="ice-stage-container" id="iceStageContainer">
+        <!-- FLOATING CONTEXT TOOLBAR -->
+        <div class="floating-context-bar" id="floatingBar" style="display: none;">
+          <div class="context-obj-tag">
+            <span class="obj-type-label">Object</span>
+            <span class="obj-name-val" id="contextObjName">Puck</span>
+          </div>
+
+          <div class="context-divider"></div>
+
+          <!-- Color Swatch & Picker -->
+          <div class="color-picker-wrapper">
+            <button type="button" class="swatch-btn" id="currentSwatchBtn" title="Change Color">
+              <span class="swatch-circle" id="currentSwatchCircle"></span>
+            </button>
+            <div class="color-palette-popover" id="colorPalettePopover">
+              <button type="button" class="palette-dot" data-color="#111111" style="background:#111111;" title="Black"></button>
+              <button type="button" class="palette-dot" data-color="#d32f2f" style="background:#d32f2f;" title="Red"></button>
+              <button type="button" class="palette-dot" data-color="#1976d2" style="background:#1976d2;" title="Blue"></button>
+              <button type="button" class="palette-dot" data-color="#2e7d32" style="background:#2e7d32;" title="Green"></button>
+              <button type="button" class="palette-dot" data-color="#f57c00" style="background:#f57c00;" title="Orange"></button>
+              <button type="button" class="palette-dot" data-color="#fbc02d" style="background:#fbc02d;" title="Yellow"></button>
+              <button type="button" class="palette-dot" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc;" title="White"></button>
+            </div>
+          </div>
+
+          <!-- Stroke Style / Width -->
+          <div class="stroke-picker-wrapper">
+            <button type="button" class="icon-btn-compact" id="btnStrokeStyle" title="Line Style & Width">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+            </button>
+            <div class="stroke-menu-popover" id="strokeMenuPopover">
+              <div class="popover-section-title">Line Weight</div>
+              <div class="stroke-options">
+                <button type="button" class="stroke-option-btn" data-width="2">Thin (2px)</button>
+                <button type="button" class="stroke-option-btn active" data-width="3.5">Medium (3.5px)</button>
+                <button type="button" class="stroke-option-btn" data-width="6">Thick (6px)</button>
+              </div>
+              <div class="popover-section-title">Line Style</div>
+              <div class="stroke-options">
+                <button type="button" class="stroke-option-btn active" data-style="solid">Solid</button>
+                <button type="button" class="stroke-option-btn" data-style="dashed">Dashed</button>
+                <button type="button" class="stroke-option-btn" data-style="dotted">Dotted</button>
+                <button type="button" class="stroke-option-btn" data-style="wavy">Wavy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- More Options ("...") -->
+          <div class="more-options-wrapper">
+            <button type="button" class="icon-btn-compact" id="btnContextMore" title="More Options">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+            <div class="more-menu-popover" id="moreMenuPopover">
+              <div class="more-item" id="actDuplicate">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                <span>Duplicate</span>
+              </div>
+              <div class="more-item" id="actBringForward">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M2 2h10v10H2V2zm10 10h10v10H12V12z"/></svg>
+                <span>Bring to Front</span>
+              </div>
+              <div class="more-item" id="actSendBackward">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 12H2V2h10v10zm10 10h-10v-10h10v10z"/></svg>
+                <span>Send to Back</span>
+              </div>
+              <div class="more-item text-danger" id="actDelete">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                <span>Delete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THE RINK BOARD VIEWPORT -->
+        <div class="rink-viewport" id="rinkViewport">
+          <!-- SVG Hockey Rink Base Layer -->
+          <svg id="rinkSvg" class="rink-svg-layer" viewBox="0 0 1000 850" preserveAspectRatio="xMidYMid meet">
+            <!-- Background Ice Defs -->
+            <defs>
+              <!-- Goal Crease Radial Glow -->
+              <radialGradient id="creaseGrad" cx="30%" cy="50%" r="70%">
+                <stop offset="0%" stop-color="#cae8fb"/>
+                <stop offset="100%" stop-color="#a8d7f5"/>
+              </radialGradient>
+              
+              <!-- Subtle Ice Texture Pattern -->
+              <pattern id="iceSheen" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M0 20 L40 60 M70 10 L100 40 M20 90 L60 70" stroke="#f0f6fa" stroke-width="1.2" stroke-opacity="0.3"/>
+              </pattern>
+
+              <!-- Net Pattern -->
+              <pattern id="netMesh" width="4" height="4" patternUnits="userSpaceOnUse">
+                <path d="M0 0 L4 4 M0 4 L4 0" stroke="#b0b0b0" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+
+            <!-- Base Ice Rectangle -->
+            <rect x="0" y="0" width="1000" height="850" fill="#ffffff" class="ice-surface"/>
+            <rect x="0" y="0" width="1000" height="850" fill="url(#iceSheen)"/>
+
+            <!-- RINK GRAPHICS CONTAINER (Swapped based on view mode: Half / Full / Neutral) -->
+            <g id="rinkMarkingsGroup">
+              <!-- Rendered dynamically by app.js for pixel-perfect standard dimensions -->
+            </g>
+          </svg>
+
+          <!-- INTERACTIVE CANVAS FOR DRAWING & PLACED OBJECTS -->
+          <canvas id="drillCanvas" width="1000" height="850"></canvas>
+
+          <!-- SVG OVERLAY FOR DYNAMIC GUIDELINES & HIGHLIGHTS -->
+          <svg id="guidelinesSvg" class="guidelines-overlay-layer" viewBox="0 0 1000 850">
+            <!-- Dotted blue alignment lines will appear here when dragging/snapping -->
+            <g id="guidelineElements"></g>
+          </svg>
+        </div>
+
+        <!-- ANIMATION CONTROL BAR (Shows during animation) -->
+        <div class="anim-control-bar" id="animControlBar" style="display: none;">
+          <button type="button" class="anim-btn" id="btnPlayPause">
+            <svg id="iconPlay" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+            <svg id="iconPause" viewBox="0 0 24 24" width="18" height="18" style="display:none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <span id="txtPlayPause">Play Drill</span>
+          </button>
+
+          <div class="anim-progress-wrapper">
+            <input type="range" id="animScrubber" min="0" max="100" value="0" class="anim-slider">
+            <span id="animTimeLabel" class="anim-time-label">0.0s / 4.0s</span>
+          </div>
+
+          <button type="button" class="anim-btn-secondary" id="btnResetAnim">Reset</button>
+          <button type="button" class="anim-close-btn" id="btnCloseAnim" title="Close Animation">✕</button>
+        </div>
+
+        <!-- FLOATING COACH CHAT BUBBLE (Bottom right like screenshot) -->
+        <button type="button" class="coach-assistant-bubble" id="btnCoachAssistant" title="Coaching Tips & Drill Help">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+        </button>
+      </main>
+
+      <!-- RIGHT SIDEBAR: "DRILLS" DRAWER & PLAYBOOK -->
+      <aside class="drills-drawer" id="drillsDrawer">
+        <button type="button" class="drills-tab-handle" id="btnDrillsTabHandle">
+          <span>DRILLS</span>
+        </button>
+
+        <div class="drills-drawer-content">
+          <div class="drills-drawer-header">
+            <h3>Drill Playbook</h3>
+            <button type="button" class="close-drawer-btn" id="btnCloseDrillsDrawer">✕</button>
+          </div>
+
+          <div class="drills-category-tabs">
+            <button type="button" class="cat-tab active" data-cat="all">All</button>
+            <button type="button" class="cat-tab" data-cat="dzone">Defensive</button>
+            <button type="button" class="cat-tab" data-cat="offense">Offense</button>
+            <button type="button" class="cat-tab" data-cat="special">Special Teams</button>
+          </div>
+
+          <div class="drills-list" id="drillsList">
+            <!-- Preset & Saved drills populated here -->
+          </div>
+
+          <div class="drills-drawer-footer">
+            <button type="button" class="primary-action-btn" id="btnSaveCurrentToLibrary">
+              + Save Current Drill
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- DRILL NOTES / COACHING POINTS MODAL -->
+    <div class="modal-backdrop" id="notesModal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Drill Coaching Points & Notes</h3>
+          <button type="button" class="modal-close-btn" id="btnCloseNotesModal">✕</button>
+        </div>
+        <div class="modal-body">
+          <label class="modal-label">Drill Name</label>
+          <input type="text" id="modalDrillName" class="modal-text-input">
+
+          <label class="modal-label">Age Group / Level</label>
+          <select id="modalAgeGroup" class="modal-select">
+            <option>Youth (U8 - U10 Mites/Squirts)</option>
+            <option>PeeWee (U12)</option>
+            <option selected>Bantam / Midget (U14 - U16)</option>
+            <option>Junior / High School</option>
+            <option>Adult / Rec League</option>
+          </select>
+
+          <label class="modal-label">Key Teaching Points</label>
+          <textarea id="modalCoachingPoints" class="modal-textarea" rows="4" placeholder="• Protect the house (high-danger scoring area)
+• Strong-side winger covers the point
+• Center supports the defensemen down low
+• Stick on the ice, head on a swivel"></textarea>
+
+          <label class="modal-label">Drill Description & Flow</label>
+          <textarea id="modalDescription" class="modal-textarea" rows="3" placeholder="Explain drill execution, whistle cues, rotations..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="secondary-btn" id="btnCancelNotes">Cancel</button>
+          <button type="button" class="primary-btn" id="btnSaveNotes">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div class="toast-banner" id="toastBanner">Drill saved successfully</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

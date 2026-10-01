@@ -1,0 +1,20 @@
+{
+  "name": "Hockey Coach Drill Board",
+  "short_name": "DrillCoach",
+  "description": "Interactive hockey whiteboard & drill studio for coaches",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#105991",
+  "categories": ["sports", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
